@@ -63,9 +63,9 @@ class GamepadNavigationPlugin:
 
         self.gamepad_bridge = GamepadBridge(self.iface)
         self.gamepad_bridge.deviceIdChanged.connect(self.deviceChanged)
+        self.gamepad_bridge.buttonPressed.connect(self.buttonPressed)
         self.gamepad_bridge.axisLeftChanged.connect(self.updateNavigation)
         self.gamepad_bridge.axisRightChanged.connect(self.updateNavigation)
-        self.gamepad_bridge.buttonPressed.connect(self.buttonPressed)
         
         self.widget = GamepadQuickWidget()
         self.widget.rootContext().setContextProperty("gamepadBridge", self.gamepad_bridge)
@@ -177,18 +177,25 @@ class GamepadNavigationPlugin:
         axis_max = max(abs(self.gamepad_bridge.axisLeftX), abs(self.gamepad_bridge.axisLeftY), abs(self.gamepad_bridge.axisRightX), abs(self.gamepad_bridge.axisRightY))
         if axis_max > 0.12:
             if not self.timer.isActive():
+                self.gamepad_bridge.axisLeftChanged.disconnect(self.updateNavigation)
+                self.gamepad_bridge.axisRightChanged.disconnect(self.updateNavigation)
                 if self.timer_canvas_type == '2d':
                     self.timer_canvas.stopRendering()
                     self.timer_canvas.freeze(True)
                 self.timer.start(50)
-        else:
-            if self.timer.isActive():
-                self.timer.stop()
-                if self.timer_canvas_type == '2d':
-                    self.timer_canvas.freeze(False)
-                    self.timer_canvas.refresh()
+                self.navigationTimeout()
 
     def navigationTimeout(self):
+        axis_max = max(abs(self.gamepad_bridge.axisLeftX), abs(self.gamepad_bridge.axisLeftY), abs(self.gamepad_bridge.axisRightX), abs(self.gamepad_bridge.axisRightY))
+        if axis_max <= 0.12:
+            self.gamepad_bridge.axisLeftChanged.connect(self.updateNavigation)
+            self.gamepad_bridge.axisRightChanged.connect(self.updateNavigation)
+            self.timer.stop()
+            if self.timer_canvas_type == '2d':
+                self.timer_canvas.freeze(False)
+                self.timer_canvas.refresh()
+            return
+
         try:
             if self.timer_canvas_type == '2d':
                 map_units_per_pixel = self.timer_canvas.mapSettings().mapUnitsPerPixel()        
