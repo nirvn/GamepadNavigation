@@ -59,6 +59,8 @@ class GamepadMappingDialog(QDialog, GamepadMappingDialogUi):
         self.buttonCombobox.addItem('Button Down', 'buttonDown')
         self.buttonCombobox.addItem('Button Left', 'buttonLeft')
         self.buttonCombobox.addItem('Button Right', 'buttonRight')
+        self.buttonCombobox.addItem('Button Select', 'buttonSelect')
+        self.buttonCombobox.addItem('Button Start', 'buttonStart')
         self.buttonCombobox.currentIndexChanged.connect(self.buttonChanged)
         
         self.actionTypeCombobox.addItem('Go To Bookmark', 'bookmark')

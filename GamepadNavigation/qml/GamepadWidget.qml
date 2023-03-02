@@ -42,6 +42,8 @@ Item {
     onButtonDownChanged: gamepadBridge.buttonDown = buttonDown
     onButtonLeftChanged: gamepadBridge.buttonLeft = buttonLeft
     onButtonRightChanged: gamepadBridge.buttonRight = buttonRight
+    onButtonSelectChanged: gamepadBridge.buttonSelect = buttonSelect
+    onButtonStartChanged: gamepadBridge.buttonStart = buttonStart
   }
 
   SystemPalette {

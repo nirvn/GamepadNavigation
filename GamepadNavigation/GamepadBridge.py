@@ -46,6 +46,8 @@ class GamepadBridge(QObject):
     _buttonDown = False
     _buttonLeft = False
     _buttonRight = False
+    _buttonSelect = False
+    _buttonStart = False
 
     def __init__(self, iface, parent: QObject = None):
         super(GamepadBridge, self).__init__(parent)
@@ -225,3 +227,22 @@ class GamepadBridge(QObject):
             self._buttonRight = value
             if self._buttonRight:
                 self.buttonPressed.emit('buttonRight')
+
+    @pyqtProperty(bool)
+    def buttonSelect(self):
+        return self._buttonSelect
+    @buttonSelect.setter
+    def buttonSelect(self, value):
+        if self._buttonSelect != value:
+            self._buttonSelect = value
+            if self._buttonSelect:
+                self.buttonPressed.emit('buttonSelect')
+    @pyqtProperty(bool)
+    def buttonStart(self):
+        return self._buttonStart
+    @buttonStart.setter
+    def buttonStart(self, value):
+        if self._buttonStart != value:
+            self._buttonStart = value
+            if self._buttonStart:
+                self.buttonPressed.emit('buttonStart')
