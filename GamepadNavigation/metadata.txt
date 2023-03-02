@@ -1,0 +1,23 @@
+[general]
+name=Gamepad Navigation
+qgisMinimumVersion=3.22
+description=Navigate QGIS' main map canvas using your favorite gamepad controller
+version=0.9
+author=Mathieu Pellerin
+email=nirvn.asia@gmail.com
+
+about=Navigate QGIS' main map canvas using your favorite gamepad controller
+tags=ps4,xbox,gamepad,controller
+
+tracker=https://github.com/nirvn/FlightSimulatorTools/issues
+repository=https://github.com/nirvn/FlightSimulatorTools
+
+#changelog=
+
+#homepage=
+category=navigation
+icon=icon.png
+
+experimental=False
+deprecated=False
+
