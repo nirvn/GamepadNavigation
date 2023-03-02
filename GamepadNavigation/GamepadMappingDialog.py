@@ -48,10 +48,8 @@ class GamepadMappingDialog(QDialog, GamepadMappingDialogUi):
         self.mapCanvasCombobox.currentIndexChanged.connect(self.mapCanvasChanged)
         
         self.buttonCombobox.addItem('Button Left #1', 'buttonL1')
-        self.buttonCombobox.addItem('Button Left #2', 'buttonL2')
         self.buttonCombobox.addItem('Button Left #3', 'buttonL3')
         self.buttonCombobox.addItem('Button Right #1', 'buttonR1')
-        self.buttonCombobox.addItem('Button Right #2', 'buttonR2')
         self.buttonCombobox.addItem('Button Right #3', 'buttonR3')
         self.buttonCombobox.addItem('Button A / X', 'buttonA')
         self.buttonCombobox.addItem('Button B / Circle', 'buttonB')

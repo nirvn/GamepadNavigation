@@ -29,10 +29,10 @@ Item {
     onAxisRightXChanged: gamepadBridge.axisRightX = axisRightX
     onAxisRightYChanged: gamepadBridge.axisRightY = axisRightY
     onButtonL1Changed: gamepadBridge.buttonL1 = buttonL1
-    onButtonL2Changed: gamepadBridge.buttonL2 = buttonL2 > 0.5
+    onButtonL2Changed: gamepadBridge.buttonL2 = buttonL2
     onButtonL3Changed: gamepadBridge.buttonL3 = buttonL3
     onButtonR1Changed: gamepadBridge.buttonR1 = buttonR1
-    onButtonR2Changed: gamepadBridge.buttonR2 = buttonR2 > 0.5
+    onButtonR2Changed: gamepadBridge.buttonR2 = buttonR2
     onButtonR3Changed: gamepadBridge.buttonR3 = buttonR3
     onButtonAChanged: gamepadBridge.buttonA = buttonA
     onButtonBChanged: gamepadBridge.buttonB = buttonB

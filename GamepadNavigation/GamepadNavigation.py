@@ -66,6 +66,8 @@ class GamepadNavigationPlugin:
         self.gamepad_bridge.buttonPressed.connect(self.buttonPressed)
         self.gamepad_bridge.axisLeftChanged.connect(self.updateNavigation)
         self.gamepad_bridge.axisRightChanged.connect(self.updateNavigation)
+        self.gamepad_bridge.buttonL2Changed.connect(self.updateNavigation)
+        self.gamepad_bridge.buttonR2Changed.connect(self.updateNavigation)
         
         self.widget = GamepadQuickWidget()
         self.widget.rootContext().setContextProperty("gamepadBridge", self.gamepad_bridge)
@@ -174,11 +176,18 @@ class GamepadNavigationPlugin:
         if not self.timer_canvas:
             return
         
-        axis_max = max(abs(self.gamepad_bridge.axisLeftX), abs(self.gamepad_bridge.axisLeftY), abs(self.gamepad_bridge.axisRightX), abs(self.gamepad_bridge.axisRightY))
+        axis_max = max(abs(self.gamepad_bridge.axisLeftX), 
+                       abs(self.gamepad_bridge.axisLeftY),
+                       abs(self.gamepad_bridge.axisRightX),
+                       abs(self.gamepad_bridge.axisRightY),
+                       self.gamepad_bridge.buttonL2,
+                       self.gamepad_bridge.buttonR2)
         if axis_max > 0.12:
             if not self.timer.isActive():
                 self.gamepad_bridge.axisLeftChanged.disconnect(self.updateNavigation)
                 self.gamepad_bridge.axisRightChanged.disconnect(self.updateNavigation)
+                self.gamepad_bridge.buttonL2Changed.disconnect(self.updateNavigation)
+                self.gamepad_bridge.buttonR2Changed.disconnect(self.updateNavigation)
                 if self.timer_canvas_type == '2d':
                     self.timer_canvas.stopRendering()
                     self.timer_canvas.freeze(True)
@@ -186,10 +195,17 @@ class GamepadNavigationPlugin:
                 self.navigationTimeout()
 
     def navigationTimeout(self):
-        axis_max = max(abs(self.gamepad_bridge.axisLeftX), abs(self.gamepad_bridge.axisLeftY), abs(self.gamepad_bridge.axisRightX), abs(self.gamepad_bridge.axisRightY))
+        axis_max = max(abs(self.gamepad_bridge.axisLeftX), 
+                       abs(self.gamepad_bridge.axisLeftY),
+                       abs(self.gamepad_bridge.axisRightX),
+                       abs(self.gamepad_bridge.axisRightY),
+                       self.gamepad_bridge.buttonL2,
+                       self.gamepad_bridge.buttonR2)
         if axis_max <= 0.12:
             self.gamepad_bridge.axisLeftChanged.connect(self.updateNavigation)
             self.gamepad_bridge.axisRightChanged.connect(self.updateNavigation)
+            self.gamepad_bridge.buttonL2Changed.connect(self.updateNavigation)
+            self.gamepad_bridge.buttonR2Changed.connect(self.updateNavigation)
             self.timer.stop()
             if self.timer_canvas_type == '2d':
                 self.timer_canvas.freeze(False)
@@ -225,17 +241,25 @@ class GamepadNavigationPlugin:
                     elif rotation < -360:
                          rotation = 360 + (rotation + 360)
                     self.timer_canvas.setRotation(rotation)
+                
+                if self.gamepad_bridge.buttonL2 > 0.1 or self.gamepad_bridge.buttonR2 > 0.1:
+                    magnification_factor = self.timer_canvas.magnificationFactor()
+                    magnification_factor = magnification_factor + (-self.gamepad_bridge.buttonL2 + self.gamepad_bridge.buttonR2) / 100 * 2
+                    self.timer_canvas.setMagnificationFactor(magnification_factor)
             elif self.timer_canvas_type == '3d':
                 move_x = 0.0
                 move_y = 0.0
+                move_z = 0.0
                 if abs(self.gamepad_bridge.axisLeftY) > 0.1:
                     move_x = -10 * self.gamepad_bridge.axisLeftY
                 if abs(self.gamepad_bridge.axisLeftX) > 0.1:
                     move_y = -10 * self.gamepad_bridge.axisLeftX
+                if self.gamepad_bridge.buttonL2 > 0.1 or self.gamepad_bridge.buttonR2 > 0.1:
+                    move_z = 20 * -self.gamepad_bridge.buttonL2 + 20 * self.gamepad_bridge.buttonR2
                 
-                if move_x != 0.0 or move_y != 0.0:
+                if move_x != 0.0 or move_y != 0.0 or move_z != 0.0:
                     movement_speed = self.timer_canvas.cameraController().cameraMovementSpeed()
-                    self.timer_canvas.cameraController().walkView(move_x * movement_speed, move_y * movement_speed, 0)
+                    self.timer_canvas.cameraController().walkView(move_x * movement_speed, move_y * movement_speed, move_z * movement_speed)
                 
                 pitch = 0.0
                 yaw = 0.0

@@ -23,6 +23,8 @@ class GamepadBridge(QObject):
     deviceIdChanged = pyqtSignal()
     axisLeftChanged = pyqtSignal()
     axisRightChanged = pyqtSignal()
+    buttonL2Changed = pyqtSignal()
+    buttonR2Changed = pyqtSignal()
     buttonPressed = pyqtSignal(str)
 
     _deviceId = 0
@@ -31,10 +33,10 @@ class GamepadBridge(QObject):
     _axisRightX = 0.0
     _axisRightY = 0.0
     _buttonR1 = False
-    _buttonR2 = False
+    _buttonR2 = 0.0
     _buttonR3 = False
     _buttonL1 = False
-    _buttonL2 = False
+    _buttonL2 = 0.0
     _buttonL3 = False
     _buttonA = False
     _buttonB = False
@@ -103,7 +105,7 @@ class GamepadBridge(QObject):
             self._buttonR1 = value
             if self._buttonR1:
                 self.buttonPressed.emit('buttonR1')
-    @pyqtProperty(bool)
+    @pyqtProperty(float)
     def buttonR2(self):
         return self._buttonR2
     @buttonR2.setter
@@ -111,7 +113,7 @@ class GamepadBridge(QObject):
         if self._buttonR2 != value:
             self._buttonR2 = value
             if self._buttonR2:
-                self.buttonPressed.emit('buttonR2')
+                self.buttonR2Changed.emit()
     @pyqtProperty(bool)
     def buttonR3(self):
         return self._buttonR3
@@ -131,7 +133,7 @@ class GamepadBridge(QObject):
             self._buttonL1 = value
             if self._buttonL1:
                 self.buttonPressed.emit('buttonL1')
-    @pyqtProperty(bool)
+    @pyqtProperty(float)
     def buttonL2(self):
         return self._buttonL2
     @buttonL2.setter
@@ -139,7 +141,7 @@ class GamepadBridge(QObject):
         if self._buttonL2 != value:
             self._buttonL2 = value
             if self._buttonL2:
-                self.buttonPressed.emit('buttonL2')
+                self.buttonL2Changed.emit()
     @pyqtProperty(bool)
     def buttonL3(self):
         return self._buttonL3
