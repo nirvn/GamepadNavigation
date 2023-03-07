@@ -1,4 +1,4 @@
-# Gamepad Navigator, a QGIS plugin
+# Gamepad Navigation, a QGIS plugin
 
 This QGIS plugin enables users to interact with their QGIS 2D and 3D map
 canvases using gamepad controllers.
