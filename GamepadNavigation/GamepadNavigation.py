@@ -34,8 +34,6 @@ from qgis.PyQt.QtGui import QIcon
 
 from PyQt5.QtQuickWidgets import QQuickWidget
 
-VERSION = '0.9'
-
 class GamepadQuickWidget(QQuickWidget):
 
     mouseClicked = pyqtSignal()
