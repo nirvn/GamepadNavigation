@@ -17,10 +17,11 @@ import os
 
 from qgis.core import QgsApplication, QgsProject, QgsBookmarkManagerModel
 
-_3D_SUPPORT = False
+_3D_SUPPORT = True
 try:
     from qgis._3d import Qgs3DMapScene, QgsCameraController
-    _3D_SUPPORT = True
+except:
+    _3D_SUPPORT = False
 
 from qgis.PyQt.QtCore import Qt
 from qgis.PyQt.QtWidgets import QDialog, QDialogButtonBox, QMainWindow, QWidget
