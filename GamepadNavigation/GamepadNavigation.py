@@ -21,7 +21,12 @@ from GamepadNavigation.GamepadMappingDialog import GamepadMappingDialog
 
 from qgis.core import Qgis, QgsApplication, QgsProject, QgsRectangle, QgsVector
 from qgis.gui import QgsMessageBar, QgsMessageBarItem
-from qgis._3d import Qgs3DMapScene, QgsCameraController
+
+_3D_SUPPORT = True
+try:
+    from qgis._3d import Qgs3DMapScene, QgsCameraController
+except:
+    _3D_SUPPORT = False
 
 from qgis.PyQt.QtCore import pyqtSlot, pyqtProperty, pyqtSignal, Qt, QObject, QUrl, QTimer
 from qgis.PyQt.QtWidgets import QWidget, QPushButton
@@ -102,7 +107,7 @@ class GamepadNavigationPlugin:
                 if mapCanvas.objectName() == canvas_name:
                     canvas = mapCanvas
                     break
-        elif canvas_type == '3d':
+        elif _3D_SUPPORT and canvas_type == '3d':
             for scene in Qgs3DMapScene.openScenes().items():
                 if scene[0] == canvas_name:
                     canvas = scene[1]
@@ -135,14 +140,14 @@ class GamepadNavigationPlugin:
                             if canvas_type == '2d':
                                 canvas.setExtent(bookmark.extent())
                                 canvas.refresh()
-                            elif canvas_type == '3d':
+                            elif _3D_SUPPORT and canvas_type == '3d':
                                 canvas.setViewFrom2DExtent(bookmark.extent())
                 elif action_type == 'map_theme':
                     if not self.project.mapThemeCollection().hasMapTheme(action_details):
                         return;
                     if canvas_type == '2d' and canvas_name != 'theMapCanvas':
                         canvas.setTheme(action_details)
-                    elif canvas_type == '3d':
+                    elif _3D_SUPPORT and canvas_type == '3d':
                         canvas.mapSettings().setTerrainMapTheme(action_details)
                     else:
                         root = self.project.layerTreeRoot()
@@ -246,7 +251,7 @@ class GamepadNavigationPlugin:
                     magnification_factor = self.timer_canvas.magnificationFactor()
                     magnification_factor = magnification_factor + (-self.gamepad_bridge.buttonL2 + self.gamepad_bridge.buttonR2) / 100 * 2
                     self.timer_canvas.setMagnificationFactor(magnification_factor)
-            elif self.timer_canvas_type == '3d':
+            elif _3D_SUPPORT and self.timer_canvas_type == '3d':
                 move_x = 0.0
                 move_y = 0.0
                 move_z = 0.0

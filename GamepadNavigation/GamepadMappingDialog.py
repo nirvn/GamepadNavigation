@@ -16,7 +16,11 @@ __revision__ = '$Format:%H$'
 import os
 
 from qgis.core import QgsApplication, QgsProject, QgsBookmarkManagerModel
-from qgis._3d import Qgs3DMapScene
+
+_3D_SUPPORT = False
+try:
+    from qgis._3d import Qgs3DMapScene, QgsCameraController
+    _3D_SUPPORT = True
 
 from qgis.PyQt.QtCore import Qt
 from qgis.PyQt.QtWidgets import QDialog, QDialogButtonBox, QMainWindow, QWidget
@@ -114,8 +118,9 @@ class GamepadMappingDialog(QDialog, GamepadMappingDialogUi):
         for mapCanvas in self.iface.mapCanvases():
             canvas_name = self.tr( "Main window map canvas" ) if mapCanvas.objectName() == "theMapCanvas" else mapCanvas.objectName()
             self.mapCanvasCombobox.addItem(QgsApplication.instance().getThemeIcon('mLayoutItemMap.svg'), canvas_name + ' (2D)', '2d:' + mapCanvas.objectName())
-        for sceneName in Qgs3DMapScene.openScenes().keys():
-            self.mapCanvasCombobox.addItem(QgsApplication.instance().getThemeIcon('mLayoutItem3DMap.svg'), sceneName + ' (2D)', '3d:' + sceneName)
+        if _3D_SUPPORT:
+            for sceneName in Qgs3DMapScene.openScenes().keys():
+                self.mapCanvasCombobox.addItem(QgsApplication.instance().getThemeIcon('mLayoutItem3DMap.svg'), sceneName + ' (2D)', '3d:' + sceneName)
         (canvas_string, found) = self.project.readEntry('GamepadNavigation', 'canvas', '2d:theMapCanvas')
         idx = self.mapCanvasCombobox.findData(canvas_string)
         if idx == -1:
