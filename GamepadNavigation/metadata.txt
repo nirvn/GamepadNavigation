@@ -1,12 +1,12 @@
 [general]
 name=Gamepad Navigation
 qgisMinimumVersion=3.28
-description=Navigate 2D and 3D map canvases using gamepad controllers (PLaystation, Xbox, PC, etc.)
+description=Navigate 2D and 3D map canvases using gamepad controllers (Playstation, Xbox, PC, etc.)
 version=1.0
 author=Mathieu Pellerin
 email=nirvn.asia@gmail.com
 
-about=Navigate 2D and 3D map canvases using gamepad controllers (PLaystation, Xbox, PC, etc.)
+about=Navigate 2D and 3D map canvases using gamepad controllers (Playstation, Xbox, PC, etc.)
 tags=ps4,ps5,ps,xbox,gamepad,controller
 
 tracker=https://github.com/nirvn/GamepadNavigation/issues
