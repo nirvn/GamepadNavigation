@@ -198,6 +198,9 @@ class GamepadNavigationPlugin:
                 self.navigationTimeout()
 
     def navigationTimeout(self):
+        def scale_exp(value, domain_min, domain_max, range_min, range_max, exponent):
+            return ((range_max - range_min) / pow(domain_max - domain_min, exponent)) * pow(value - domain_min, exponent) + range_min;
+
         axis_max = max(abs(self.gamepad_bridge.axisLeftX), 
                        abs(self.gamepad_bridge.axisLeftY),
                        abs(self.gamepad_bridge.axisRightX),
@@ -217,13 +220,14 @@ class GamepadNavigationPlugin:
 
         try:
             if self.timer_canvas_type == '2d':
-                map_units_per_pixel = self.timer_canvas.mapSettings().mapUnitsPerPixel()        
+                max_movement = self.timer_canvas.mapSettings().mapUnitsPerPixel() * 50
+                exp_movement = 3
                 move_x = 0.0
                 move_y = 0.0
                 if abs(self.gamepad_bridge.axisLeftX) > 0.1:
-                    move_x = map_units_per_pixel * 50 * self.gamepad_bridge.axisLeftX
+                    move_x = scale_exp(abs(self.gamepad_bridge.axisLeftX), 0, 1, 0, max_movement, exp_movement) * (-1 if self.gamepad_bridge.axisLeftX < 0 else 1)
                 if abs(self.gamepad_bridge.axisLeftY) > 0.1:
-                    move_y = map_units_per_pixel * -50 * self.gamepad_bridge.axisLeftY
+                    move_y = scale_exp(abs(self.gamepad_bridge.axisLeftY), 0, 1, 0, max_movement, exp_movement) * (-1 if self.gamepad_bridge.axisLeftY > 0 else 1)
                 
                 if move_x != 0.0 or move_y != 0.0:
                     rad = math.radians(self.timer_canvas.rotation())
@@ -232,13 +236,19 @@ class GamepadNavigationPlugin:
                     center.setY(center.y() + (move_y * math.cos(rad) + move_x * math.sin(rad)))
                     self.timer_canvas.setCenter(center)
                 
+                max_zoom = 0.25
+                exp_zoom = 3
                 if abs(self.gamepad_bridge.axisRightY) > 0.2:
                     extent = self.timer_canvas.mapSettings().extent()
-                    extent.scale(1 + self.gamepad_bridge.axisRightY * 0.25)
+                    zoom_change = scale_exp(abs(self.gamepad_bridge.axisRightY), 0, 1, 0, max_zoom, exp_zoom) * (-1 if self.gamepad_bridge.axisRightY < 0 else 1)
+                    extent.scale(1 + zoom_change)
                     self.timer_canvas.setExtent(extent)
                 
+                max_rotate = 5
+                exp_rotate = 3
                 if abs(self.gamepad_bridge.axisRightX) > 0.5:
-                    rotation = self.timer_canvas.mapSettings().rotation() + 5 * self.gamepad_bridge.axisRightX
+                    rotation_change = scale_exp(abs(self.gamepad_bridge.axisRightX), 0, 1, 0, max_rotate, exp_rotate) * (-1 if self.gamepad_bridge.axisRightX < 0 else 1)
+                    rotation = self.timer_canvas.mapSettings().rotation() + rotation_change
                     if rotation > 360:
                         rotation = -360 + (rotation - 360)
                     elif rotation < -360:
@@ -250,26 +260,31 @@ class GamepadNavigationPlugin:
                     magnification_factor = magnification_factor + (-self.gamepad_bridge.buttonL2 + self.gamepad_bridge.buttonR2) / 100 * 2
                     self.timer_canvas.setMagnificationFactor(magnification_factor)
             elif _3D_SUPPORT and self.timer_canvas_type == '3d':
+                extent = self.timer_canvas.sceneExtent()
+                max_movement = max(extent.xMaximum() - extent.xMinimum(), extent.yMaximum() - extent.yMinimum()) / 150
+                exp_movement = 3
                 move_x = 0.0
                 move_y = 0.0
                 move_z = 0.0
                 if abs(self.gamepad_bridge.axisLeftY) > 0.1:
-                    move_x = -10 * self.gamepad_bridge.axisLeftY
+                    move_x = scale_exp(abs(self.gamepad_bridge.axisLeftY), 0, 1, 0, max_movement, exp_movement) * (-1 if self.gamepad_bridge.axisLeftY > 0 else 1)
                 if abs(self.gamepad_bridge.axisLeftX) > 0.1:
-                    move_y = -10 * self.gamepad_bridge.axisLeftX
+                    move_y = scale_exp(abs(self.gamepad_bridge.axisLeftX), 0, 1, 0, max_movement, exp_movement) * (-1 if self.gamepad_bridge.axisLeftX > 0 else 1)
                 if self.gamepad_bridge.buttonL2 > 0.1 or self.gamepad_bridge.buttonR2 > 0.1:
-                    move_z = 20 * -self.gamepad_bridge.buttonL2 + 20 * self.gamepad_bridge.buttonR2
+                    move_z = scale_exp(self.gamepad_bridge.buttonL2, 0, 1, 0, max_movement, exp_movement) * -1 + scale_exp(self.gamepad_bridge.buttonR2, 0, 1, 0, max_movement, exp_movement)
                 
                 if move_x != 0.0 or move_y != 0.0 or move_z != 0.0:
                     movement_speed = self.timer_canvas.cameraController().cameraMovementSpeed()
                     self.timer_canvas.cameraController().walkView(move_x * movement_speed, move_y * movement_speed, move_z * movement_speed)
                 
+                max_pitch_yaw = 5
+                exp_pitch_yaw = 3
                 pitch = 0.0
                 yaw = 0.0
                 if abs(self.gamepad_bridge.axisRightY) > 0.2:
-                    pitch = -5 * self.gamepad_bridge.axisRightY
+                    pitch = scale_exp(abs(self.gamepad_bridge.axisRightY), 0, 1, 0, max_pitch_yaw, exp_pitch_yaw) * (-1 if self.gamepad_bridge.axisRightY > 0 else 1)
                 if abs(self.gamepad_bridge.axisRightX) > 0.2:
-                    yaw = -5 * self.gamepad_bridge.axisRightX
+                    yaw = scale_exp(abs(self.gamepad_bridge.axisRightX), 0, 1, 0, max_pitch_yaw, exp_pitch_yaw) * (-1 if self.gamepad_bridge.axisRightX > 0 else 1)
                 self.timer_canvas.cameraController().rotateCamera(pitch, yaw)
         except:
             # catch scenarios such as closing a canvas while navigating 
