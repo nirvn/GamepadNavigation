@@ -8,3 +8,18 @@ Current functionality includes:
 - navigating 3D map canvases
 - switching map themes
 - going to saved user and project bookmarks
+
+## Plugin dependencies
+
+### Window
+
+The official QGIS installer already ships with all of the dependencies
+needed to run the plugin, enjoy!
+
+### Linux
+
+You will need to insure that a few Qt-related packages are installed
+on your system the plugin to run.
+
+- On Ubuntu, install `python3-pyqt5-qtquick` and `qml-module-gamepad`
+- On Fedora, install `python3-qt5` and `qt5-qtgamepad` 
