@@ -20,6 +20,7 @@ from qgis.PyQt.QtCore import pyqtSlot, pyqtProperty, pyqtSignal, Qt, QObject
 
 class GamepadBridge(QObject):
 
+    connectedChanged = pyqtSignal()
     deviceIdChanged = pyqtSignal()
     axisLeftChanged = pyqtSignal()
     axisRightChanged = pyqtSignal()
@@ -27,6 +28,7 @@ class GamepadBridge(QObject):
     buttonR2Changed = pyqtSignal()
     buttonPressed = pyqtSignal(str)
 
+    _connected = False
     _deviceId = 0
     _axisLeftX = 0.0
     _axisLeftY = 0.0
@@ -52,6 +54,15 @@ class GamepadBridge(QObject):
     def __init__(self, iface, parent: QObject = None):
         super(GamepadBridge, self).__init__(parent)
         self.iface =  iface
+
+    @pyqtProperty(bool)
+    def connected(self):
+        return self._connected
+    @connected.setter
+    def connected(self, value):
+        if self._connected != value:
+            self._connected = value
+            self.connectedChanged.emit()
 
     @pyqtProperty(int)
     def deviceId(self):

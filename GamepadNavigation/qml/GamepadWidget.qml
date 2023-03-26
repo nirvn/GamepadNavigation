@@ -21,6 +21,8 @@ Item {
   Gamepad {
     id: gamepad
     
+    onConnectedChanged: gamepadBridge.connected = connected
+    
     deviceId: GamepadManager.connectedGamepads.length > 0 ? GamepadManager.connectedGamepads[0] : 0
     onDeviceIdChanged: gamepadBridge.deviceId = deviceId
     
@@ -54,14 +56,14 @@ Item {
   Rectangle {
     anchors.fill: parent
     color: palette.base
-    
+  
     Image {
       anchors.fill: parent
       width: parent.height - 4
       height: parent.height - 4
-      source: gamepad.deviceId != 0 
-              ? imagesPath + 'gamepad_on.svg'
-              : imagesPath + 'gamepad_off.svg'
+      source: gamepad.connected 
+              ? '../images/gamepad_on.svg'
+              : '../images/gamepad_off.svg'
       fillMode: Image.PreserveAspectFit
     }
   }

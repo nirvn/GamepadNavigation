@@ -29,7 +29,7 @@ except:
     _3D_SUPPORT = False
 
 from qgis.PyQt.QtCore import pyqtSlot, pyqtProperty, pyqtSignal, Qt, QObject, QUrl, QTimer
-from qgis.PyQt.QtWidgets import QWidget, QPushButton
+from qgis.PyQt.QtWidgets import QWidget, QPushButton, QToolButton
 from qgis.PyQt.QtGui import QIcon
 
 from PyQt5.QtQuickWidgets import QQuickWidget
@@ -51,6 +51,8 @@ class GamepadNavigationPlugin:
     iface = None
     project = None
     mapping_dialog = None
+    status_bar_widget = None
+    quick_widget = None
     timer = QTimer()
     timer_canvas_type = ''
     timer_canvas = None
@@ -64,31 +66,38 @@ class GamepadNavigationPlugin:
     def initGui(self):
         self.mapping_dialog = GamepadMappingDialog(self.iface)
 
+        self.status_bar_widget = QToolButton()
+        self.status_bar_widget.setAutoRaise(True)
+        self.status_bar_widget.clicked.connect(self.toggleMappingDialog)
+        self.iface.statusBarIface().addPermanentWidget(self.status_bar_widget)
+
         self.gamepad_bridge = GamepadBridge(self.iface)
-        self.gamepad_bridge.deviceIdChanged.connect(self.deviceChanged)
+        self.gamepad_bridge.connectedChanged.connect(self.connectedChanged)
         self.gamepad_bridge.buttonPressed.connect(self.buttonPressed)
         self.gamepad_bridge.axisLeftChanged.connect(self.updateNavigation)
         self.gamepad_bridge.axisRightChanged.connect(self.updateNavigation)
         self.gamepad_bridge.buttonL2Changed.connect(self.updateNavigation)
         self.gamepad_bridge.buttonR2Changed.connect(self.updateNavigation)
-        
-        self.widget = GamepadQuickWidget()
-        self.widget.rootContext().setContextProperty("gamepadBridge", self.gamepad_bridge)
-        self.widget.rootContext().setContextProperty("imagesPath", os.path.join(self.plugin_dir, './images/'))
-        self.widget.setSource(QUrl.fromLocalFile(os.path.join(self.plugin_dir, './qml/GamepadWidget.qml')))
-        self.widget.setResizeMode(QQuickWidget.SizeRootObjectToView)
-        self.iface.statusBarIface().addPermanentWidget(self.widget)
-        
-        self.widget.mouseClicked.connect(self.toggleMappingDialog)
+
+        self.quick_widget = GamepadQuickWidget()
+        self.quick_widget.rootContext().setContextProperty("gamepadBridge", self.gamepad_bridge)
+        self.quick_widget.setSource(QUrl.fromLocalFile(os.path.join(self.plugin_dir, './qml/GamepadWidget.qml')))
+
+        self.status_bar_widget.setIcon(QIcon(os.path.join(self.plugin_dir, './images/gamepad_on.svg' if self.gamepad_bridge.connected else './images/gamepad_off.svg')))
+
         self.timer.timeout.connect(self.navigationTimeout)
 
     def unload(self):
-        self.mapping_dialog
+        self.mapping_dialog.deleteLater()
         self.timer.timeout.disconnect()
-        self.iface.statusBarIface().removeWidget(self.widget)
-        self.widget.rootContext().setContextProperty("gamepadBridge", None)
-        self.widget.deleteLater()
+
         self.gamepad_bridge.deleteLater()
+        self.iface.statusBarIface().removeWidget(self.status_bar_widget)
+        self.quick_widget.rootContext().setContextProperty("gamepadBridge", None)
+        self.quick_widget.deleteLater()
+
+        self.iface.statusBarIface().removeWidget(self.status_bar_widget)
+        self.status_bar_widget.deleteLater()
 
     def fetchCanvas(self):
         (canvas_string, found) = self.project.readEntry('GamepadNavigation', 'canvas', '2d:theMapCanvas')
@@ -115,9 +124,10 @@ class GamepadNavigationPlugin:
         else:
             return ('', '', None)
 
-    def deviceChanged(self):
+    def connectedChanged(self):
         # stop any ongoing navigation to avoid infinite movement on gamepad disconnect
         self.timer.stop()
+        self.status_bar_widget.setIcon(QIcon(os.path.join(self.plugin_dir, './images/gamepad_on.svg' if self.gamepad_bridge.connected else './images/gamepad_off.svg')))
 
     def buttonPressed(self, button: str):
         if self.mapping_dialog.isVisible():
@@ -246,7 +256,7 @@ class GamepadNavigationPlugin:
                 
                 max_rotate = 5
                 exp_rotate = 3
-                if abs(self.gamepad_bridge.axisRightX) > 0.5:
+                if abs(self.gamepad_bridge.axisRightX) > 0.85:
                     rotation_change = scale_exp(abs(self.gamepad_bridge.axisRightX), 0, 1, 0, max_rotate, exp_rotate) * (-1 if self.gamepad_bridge.axisRightX < 0 else 1)
                     rotation = self.timer_canvas.mapSettings().rotation() + rotation_change
                     if rotation > 360:
