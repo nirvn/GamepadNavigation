@@ -21,5 +21,5 @@ needed to run the plugin, enjoy!
 You will need to insure that a few Qt-related packages are installed
 on your system the plugin to run.
 
-- On Ubuntu, install `python3-pyqt5-qtquick` and `qml-module-gamepad`
+- On Ubuntu, install `python3-pyqt5.qtquick` and `qml-module-qtgamepad`
 - On Fedora, install `python3-qt5` and `qt5-qtgamepad` 
